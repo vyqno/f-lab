@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Management</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --text: #1c1b19;
+      --muted: #6b6860;
+      --line: #e6e3dc;
+      --accent: #1f4e3d;
+      --accent-soft: #e8f0ec;
+      --danger: #8b2e2e;
+      --danger-soft: #f6eaea;
+      --ok: #1f4e3d;
+      --ok-soft: #e8f0ec;
+      --radius: 10px;
+      --space: 16px;
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .page {
+      width: min(920px, calc(100% - 32px));
+      margin: 40px auto 64px;
+    }
+
+    header {
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    input, select, button {
+      font: inherit;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input:focus, select:focus, button:focus-visible {
+      outline: 2px solid color-mix(in srgb, var(--accent) 45%, white);
+      outline-offset: 1px;
+    }
+
+    small {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .grade-preview {
+      min-height: 1.4em;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 4px;
+    }
+
+    button {
+      padding: 9px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button:hover { background: #f3f1ec; }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    button.primary:hover {
+      background: color-mix(in srgb, var(--accent) 88%, black);
+    }
+
+    button.danger {
+      background: transparent;
+      border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+      color: var(--danger);
+    }
+
+    button.danger:hover { background: var(--danger-soft); }
+
+    button.small {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+
+    .toolbar {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .toolbar-search input {
+      width: 100%;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .filters label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .filters select {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .filters .filter-actions {
+      display: flex;
+      align-items: end;
+    }
+
+    .filters .filter-actions button {
+      width: 100%;
+    }
+
+    .result-count {
+      margin: 0 0 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    tbody tr:hover { background: #faf9f6; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .badge.low {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .meme {
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .empty {
+      margin: 0;
+      padding: 28px 8px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .msg {
+      display: none;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .msg.show { display: block; }
+    .msg.ok { background: var(--ok-soft); color: var(--ok); }
+    .msg.err { background: var(--danger-soft); color: var(--danger); }
+
+    .table-wrap { overflow-x: auto; }
+
+    .field-label {
+      display: grid;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .choice-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .choice {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .choice:has(input:checked) {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .choice input {
+      width: auto;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    @media (max-width: 700px) {
+      .row { grid-template-columns: 1fr; }
+      .filters { grid-template-columns: 1fr 1fr; }
+      .page { margin-top: 24px; }
+      th:nth-child(5), td:nth-child(5) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Students</h1>
+      <p>Add, edit, search, and delete records. CGPA drives grade + sound.</p>
+    </header>
+
+    <div id="message" class="msg" role="status"></div>
+
+    <section class="panel">
+      <form id="student-form">
+        <input type="hidden" id="edit-id" value="">
+
+        <div class="row">
+          <label>
+            Student ID
+            <input
+              type="text"
+              id="student-id"
+              placeholder="1BM24CB001"
+              pattern="1BM24CB[0-9]{3}"
+              maxlength="10"
+              title="1BM24CB + 3 digits"
+              required
+            >
+            <small>Format: 1BM24CB___</small>
+          </label>
+          <label>
+            Full name
+            <input type="text" id="name" placeholder="Riya Sharma" required>
+          </label>
+        </div>
+
+        <div class="field-label">
+          Course
+          <div class="choice-group" id="course-group" role="group" aria-label="Course">
+            <label class="choice"><input type="checkbox" name="course" value="BE"> BE</label>
+            <label class="choice"><input type="checkbox" name="course" value="BCom"> BCom</label>
+            <label class="choice"><input type="checkbox" name="course" value="BTech"> BTech</label>
+            <label class="choice"><input type="checkbox" name="course" value="BSc"> BSc</label>
+          </div>
+          <small>Select only one course</small>
+        </div>
+
+        <div class="row">
+          <label>
+            Year
+            <select id="year" required>
+              <option value="">Select</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+          <div></div>
+        </div>
+
+        <div class="row">
+          <label>
+            Email
+            <input
+              type="email"
+              id="email"
+              placeholder="riya@bmsce.ac.in"
+              pattern=".+@bmsce\.ac\.in"
+              title="Must end with @bmsce.ac.in"
+              required
+            >
+            <small>Only @bmsce.ac.in</small>
+          </label>
+          <label>
+            CGPA (0–10)
+            <input type="number" id="cgpa" min="0" max="10" step="0.01" placeholder="8.75" required>
+            <span id="grade-preview" class="grade-preview"></span>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="primary" id="submit-btn">Add student</button>
+          <button type="button" id="cancel-btn" hidden>Cancel</button>
+          <button type="button" class="danger" id="delete-all-btn">Delete all</button>
+        </div>
+      </form>
+    </section>
+
+    <div class="toolbar panel">
+      <div class="toolbar-search">
+        <input type="search" id="search" placeholder="Search across all columns…">
+      </div>
+      <div class="filters">
+        <label>
+          Course
+          <select id="filter-course">
+            <option value="">All</option>
+            <option value="BE">BE</option>
+            <option value="BCom">BCom</option>
+            <option value="BTech">BTech</option>
+            <option value="BSc">BSc</option>
+          </select>
+        </label>
+        <label>
+          Year
+          <select id="filter-year">
+            <option value="">All</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+        <label>
+          Grade
+          <select id="filter-grade">
+            <option value="">All</option>
+            <option value="O">O</option>
+            <option value="A+">A+</option>
+            <option value="A">A</option>
+            <option value="B+">B+</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="F">F</option>
+          </select>
+        </label>
+        <div class="filter-actions">
+          <button type="button" id="clear-filters-btn">Clear filters</button>
+        </div>
+      </div>
+    </div>
+
+    <p id="result-count" class="result-count"></p>
+
+    <section class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Course</th>
+              <th>Year</th>
+              <th>Email</th>
+              <th>CGPA</th>
+              <th>Grade</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="student-table"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="empty">No students yet.</p>
+    </section>
+  </div>
+
+  <script>
+    // ---- constants ---------------------------------------------------------
+    const STORAGE_KEY = "students";
+    const STUDENT_ID_PATTERN = /^1BM24CB[0-9]{3}$/;
+    const EMAIL_PATTERN = /^[^\s@]+@bmsce\.ac\.in$/i;
+
+    // Sound files used for grade / CRUD feedback
+    const SOUNDS = {
+      fahh: "sounds/fahh.mp3",
+      bruh: "sounds/bruh.mp3",
+      huh: "sounds/huh.mp3",
+      yippee: "sounds/yippee.mp3",
+      vineBoom: "sounds/vine-boom.mp3",
+      emotionalDamage: "sounds/emotional-damage.mp3",
+      ohMyGod: "sounds/oh-my-god.mp3",
+      achievement: "sounds/achievement-bell.mp3",
+      success: "sounds/success-win.mp3",
+      quickWin: "sounds/quick-win.mp3",
+      funnyFail: "sounds/funny-fail.mp3",
+      buzzer: "sounds/wrong-buzzer.mp3",
+      wrong: "sounds/wrong-answer.mp3",
+      sadTrombone: "sounds/sad-trombone.mp3",
+      gameOver: "sounds/game-over.mp3"
+    };
+
+    // ---- DOM references ----------------------------------------------------
+    const form = document.getElementById("student-form");
+    const editIdInput = document.getElementById("edit-id");
+    const studentIdInput = document.getElementById("student-id");
+    const nameInput = document.getElementById("name");
+    const courseBoxes = document.querySelectorAll('input[name="course"]');
+    const yearInput = document.getElementById("year");
+    const emailInput = document.getElementById("email");
+    const cgpaInput = document.getElementById("cgpa");
+    const gradePreview = document.getElementById("grade-preview");
+    const submitBtn = document.getElementById("submit-btn");
+    const cancelBtn = document.getElementById("cancel-btn");
+    const deleteAllBtn = document.getElementById("delete-all-btn");
+    const tableBody = document.getElementById("student-table");
+    const emptyMsg = document.getElementById("empty");
+    const searchInput = document.getElementById("search");
+    const filterCourse = document.getElementById("filter-course");
+    const filterYear = document.getElementById("filter-year");
+    const filterGrade = document.getElementById("filter-grade");
+    const clearFiltersBtn = document.getElementById("clear-filters-btn");
+    const resultCount = document.getElementById("result-count");
+    const messageEl = document.getElementById("message");
+
+    // Plays one sound file. Fails silently if the browser blocks autoplay.
+    function playSound(src) {
+      const audio = new Audio(src);
+      audio.volume = 0.85;
+      audio.play().catch(function () {});
+    }
+
+    // Converts a CGPA number into letter grade, CSS hint, meme label, and sound.
+    function getGradeInfo(cgpa) {
+      const value = Number(cgpa);
+      if (Number.isNaN(value) || value < 0 || value > 10) {
+        return { letter: "-", className: "", meme: "", sound: null };
+      }
+      if (value >= 9) {
+        return { letter: "O", className: "", meme: "YIPPEE!", sound: SOUNDS.yippee };
+      }
+      if (value >= 8) {
+        return { letter: "A+", className: "", meme: "GOATED", sound: SOUNDS.achievement };
+      }
+      if (value >= 7) {
+        return { letter: "A", className: "", meme: "Nice", sound: SOUNDS.quickWin };
+      }
+      if (value >= 6) {
+        return { letter: "B+", className: "", meme: "huh", sound: SOUNDS.huh };
+      }
+      if (value >= 5) {
+        return { letter: "B", className: "low", meme: "bruh", sound: SOUNDS.bruh };
+      }
+      if (value >= 4) {
+        return { letter: "C", className: "low", meme: "FAHH!", sound: SOUNDS.fahh };
+      }
+      return { letter: "F", className: "low", meme: "emotional damage", sound: SOUNDS.emotionalDamage };
+    }
+
+    // Plays the main grade sound, then a short follow-up for very high/low CGPA.
+    function playGradeSound(cgpa) {
+      const info = getGradeInfo(cgpa);
+      if (info.sound) playSound(info.sound);
+      if (Number(cgpa) < 4) {
+        setTimeout(function () { playSound(SOUNDS.vineBoom); }, 400);
+      } else if (Number(cgpa) < 5) {
+        setTimeout(function () { playSound(SOUNDS.funnyFail); }, 350);
+      } else if (Number(cgpa) >= 9) {
+        setTimeout(function () { playSound(SOUNDS.success); }, 300);
+      }
+    }
+
+    // Returns true when ID matches 1BM24CB + exactly 3 digits.
+    function isValidStudentId(id) {
+      return STUDENT_ID_PATTERN.test(id);
+    }
+
+    // Returns true when email ends with @bmsce.ac.in
+    function isValidEmail(email) {
+      return EMAIL_PATTERN.test(email);
+    }
+
+    // Returns true when CGPA is a number from 0 to 10 inclusive.
+    function isValidCgpa(cgpa) {
+      const value = Number(cgpa);
+      return !Number.isNaN(value) && value >= 0 && value <= 10;
+    }
+
+    // Returns the one checked course value, or "" if none is selected.
+    function getSelectedCourse() {
+      const checked = document.querySelector('input[name="course"]:checked');
+      return checked ? checked.value : "";
+    }
+
+    // Checks exactly one course box (and unchecks the others).
+    function setSelectedCourse(course) {
+      courseBoxes.forEach(function (box) {
+        box.checked = box.value === course;
+      });
+    }
+
+    // Checkbox "only one" rule: when you tick a course, untick the rest.
+    courseBoxes.forEach(function (box) {
+      box.addEventListener("change", function () {
+        if (box.checked) {
+          courseBoxes.forEach(function (other) {
+            if (other !== box) other.checked = false;
+          });
+        }
+      });
+    });
+
+    // READ: loads the student array from localStorage (or [] if empty).
+    function getStudents() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    }
+
+    // Saves the full student array back into localStorage as JSON.
+    function saveStudents(students) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+    }
+
+    // Shows a short success/error banner, then hides it after ~2.8s.
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = "msg show " + type;
+      setTimeout(function () {
+        messageEl.className = "msg";
+      }, 2800);
+    }
+
+    // Clears the form and exits "edit mode" back to "add mode".
+    function resetForm() {
+      form.reset();
+      editIdInput.value = "";
+      studentIdInput.disabled = false;
+      submitBtn.textContent = "Add student";
+      cancelBtn.hidden = true;
+      gradePreview.textContent = "";
+    }
+
+    // Updates the live grade preview under the CGPA input as the user types.
+    function updateGradePreview() {
+      const info = getGradeInfo(cgpaInput.value);
+      if (!cgpaInput.value) {
+        gradePreview.textContent = "";
+        return;
+      }
+      if (info.letter === "-") {
+        gradePreview.textContent = "Enter a CGPA between 0 and 10";
+        return;
+      }
+      gradePreview.innerHTML =
+        'Grade: <span class="badge ' + info.className + '">' + info.letter + "</span> " +
+        '<span class="meme">' + info.meme + "</span>";
+    }
+
+    // Reads the current search box + column dropdown filters.
+    function getActiveFilters() {
+      return {
+        query: (searchInput.value || "").toLowerCase().trim(),
+        course: filterCourse.value,
+        year: filterYear.value,
+        grade: filterGrade.value
+      };
+    }
+
+    // True when a student matches search text AND every selected column filter.
+    function matchesFilters(student, filters) {
+      const grade = getGradeInfo(student.cgpa).letter;
+
+      if (filters.course && student.course !== filters.course) return false;
+      if (filters.year && String(student.year) !== filters.year) return false;
+      if (filters.grade && grade !== filters.grade) return false;
+
+      if (!filters.query) return true;
+
+      const haystack = [
+        student.id,
+        student.name,
+        student.course,
+        String(student.year),
+        student.email,
+        String(student.cgpa),
+        grade
+      ].join(" ").toLowerCase();
+
+      return haystack.includes(filters.query);
+    }
+
+    /*
+      READ (display):
+      1. Load all students from localStorage.
+      2. Apply search + column filters (course, year, grade).
+      3. Rebuild the table rows for the filtered list.
+      4. Update the result count and empty-state message.
+    */
+    function renderStudents() {
+      const students = getStudents();
+      const filters = getActiveFilters();
+      const filtered = students.filter(function (student) {
+        return matchesFilters(student, filters);
+      });
+
+      tableBody.innerHTML = "";
+
+      filtered.forEach(function (student) {
+        const info = getGradeInfo(student.cgpa);
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+          "<td>" + student.id + "</td>" +
+          "<td>" + student.name + "</td>" +
+          "<td>" + student.course + "</td>" +
+          "<td>" + student.year + "</td>" +
+          "<td>" + student.email + "</td>" +
+          "<td>" + Number(student.cgpa).toFixed(2) + "</td>" +
+          '<td><span class="badge ' + info.className + '">' + info.letter + "</span> " +
+          '<span class="meme">' + info.meme + "</span></td>" +
+          "<td></td>";
+
+        const actionsCell = tr.lastElementChild;
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.className = "small";
+        editBtn.type = "button";
+        editBtn.addEventListener("click", function () {
+          startEdit(student.id);
+        });
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "small danger";
+        deleteBtn.type = "button";
+        deleteBtn.addEventListener("click", function () {
+          deleteStudent(student.id);
+        });
+
+        actionsCell.append(editBtn, " ", deleteBtn);
+        tableBody.appendChild(tr);
+      });
+
+      emptyMsg.style.display = filtered.length === 0 ? "block" : "none";
+      emptyMsg.textContent = students.length === 0
+        ? "No students yet."
+        : "No students match these filters.";
+
+      resultCount.textContent = filtered.length + " of " + students.length + " students";
+    }
+
+    // Resets search + all column filters, then redraws the table.
+    function clearFilters() {
+      searchInput.value = "";
+      filterCourse.value = "";
+      filterYear.value = "";
+      filterGrade.value = "";
+      renderStudents();
+    }
+
+    // CREATE + UPDATE: runs when the form is submitted.
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const students = getStudents();
+      const editingId = editIdInput.value.trim();
+
+      const record = {
+        id: studentIdInput.value.trim(),
+        name: nameInput.value.trim(),
+        course: getSelectedCourse(),
+        year: yearInput.value,
+        email: emailInput.value.trim(),
+        cgpa: Number(cgpaInput.value)
+      };
+
+      if (!record.id || !record.name || !record.course || !record.year || !record.email || cgpaInput.value === "") {
+        playSound(SOUNDS.buzzer);
+        showMessage("Please fill in all fields (pick one course).", "err");
+        return;
+      }
+
+      if (!isValidStudentId(record.id)) {
+        playSound(SOUNDS.ohMyGod);
+        showMessage("Student ID must be 1BM24CB followed by 3 digits.", "err");
+        studentIdInput.focus();
+        return;
+      }
+
+      if (!isValidEmail(record.email)) {
+        playSound(SOUNDS.wrong);
+        showMessage("Email must end with @bmsce.ac.in", "err");
+        emailInput.focus();
+        return;
+      }
+
+      if (!isValidCgpa(record.cgpa)) {
+        playSound(SOUNDS.buzzer);
+        showMessage("CGPA must be between 0 and 10.", "err");
+        cgpaInput.focus();
+        return;
+      }
+
+      if (editingId) {
+        // UPDATE path: replace the existing student with the same ID.
+        const index = students.findIndex(function (s) {
+          return s.id === editingId;
+        });
+        if (index === -1) {
+          playSound(SOUNDS.buzzer);
+          showMessage("Student not found.", "err");
+          return;
+        }
+        students[index] = record;
+        saveStudents(students);
+        playGradeSound(record.cgpa);
+        showMessage("Updated · " + getGradeInfo(record.cgpa).letter + " " + getGradeInfo(record.cgpa).meme, "ok");
+      } else {
+        // CREATE path: reject duplicate IDs, then append the new student.
+        const exists = students.some(function (s) {
+          return s.id.toLowerCase() === record.id.toLowerCase();
+        });
+        if (exists) {
+          playSound(SOUNDS.ohMyGod);
+          showMessage("Student ID already exists.", "err");
+          return;
+        }
+        students.push(record);
+        saveStudents(students);
+        playGradeSound(record.cgpa);
+        showMessage("Added · " + getGradeInfo(record.cgpa).letter + " " + getGradeInfo(record.cgpa).meme, "ok");
+      }
+
+      resetForm();
+      renderStudents();
+    });
+
+    // Loads one student into the form so the user can UPDATE it.
+    function startEdit(id) {
+      const students = getStudents();
+      const student = students.find(function (s) {
+        return s.id === id;
+      });
+      if (!student) return;
+
+      editIdInput.value = student.id;
+      studentIdInput.value = student.id;
+      studentIdInput.disabled = true;
+      nameInput.value = student.name;
+      setSelectedCourse(student.course);
+      yearInput.value = student.year;
+      emailInput.value = student.email;
+      cgpaInput.value = student.cgpa;
+      submitBtn.textContent = "Update student";
+      cancelBtn.hidden = false;
+      updateGradePreview();
+      nameInput.focus();
+    }
+
+    // DELETE: confirms, removes one student by ID, then re-renders the table.
+    function deleteStudent(id) {
+      const confirmed = confirm("Delete student " + id + "?");
+      if (!confirmed) return;
+
+      const students = getStudents().filter(function (s) {
+        return s.id !== id;
+      });
+      saveStudents(students);
+
+      if (editIdInput.value === id) {
+        resetForm();
+      }
+
+      playSound(SOUNDS.fahh);
+      setTimeout(function () { playSound(SOUNDS.sadTrombone); }, 250);
+      showMessage("Deleted · FAHH!", "ok");
+      renderStudents();
+    }
+
+    // DELETE ALL: clears every student after confirmation.
+    function deleteAllStudents() {
+      const students = getStudents();
+      if (students.length === 0) {
+        playSound(SOUNDS.huh);
+        showMessage("No students to delete.", "err");
+        return;
+      }
+
+      const confirmed = confirm("Delete ALL " + students.length + " students?");
+      if (!confirmed) return;
+
+      saveStudents([]);
+      resetForm();
+      playSound(SOUNDS.emotionalDamage);
+      setTimeout(function () { playSound(SOUNDS.gameOver); }, 450);
+      showMessage("All deleted · emotional damage", "ok");
+      renderStudents();
+    }
+
+    // ---- event wiring ------------------------------------------------------
+    cancelBtn.addEventListener("click", function () {
+      resetForm();
+    });
+
+    deleteAllBtn.addEventListener("click", deleteAllStudents);
+
+    studentIdInput.addEventListener("input", function () {
+      studentIdInput.value = studentIdInput.value.toUpperCase();
+    });
+
+    cgpaInput.addEventListener("input", updateGradePreview);
+
+    // Live search + column filters: re-filter whenever any control changes.
+    searchInput.addEventListener("input", renderStudents);
+    filterCourse.addEventListener("change", renderStudents);
+    filterYear.addEventListener("change", renderStudents);
+    filterGrade.addEventListener("change", renderStudents);
+    clearFiltersBtn.addEventListener("click", clearFilters);
+
+    // Initial READ when the page loads.
+    renderStudents();
+  </script>
+</body>
+</html>

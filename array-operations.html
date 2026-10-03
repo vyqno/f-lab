@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Array Operations</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+        }
+
+        .box {
+            width: 480px;
+            margin: 50px auto;
+            padding: 30px;
+            box-shadow: 0 0 10px gray;
+        }
+
+        input {
+            padding: 10px;
+            width: 280px;
+            margin-bottom: 8px;
+        }
+
+        button {
+            padding: 8px 14px;
+            margin: 4px;
+        }
+
+        #array {
+            font-size: 18px;
+            margin: 16px 0 8px;
+        }
+
+        #result {
+            font-size: 18px;
+            min-height: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+
+        <h1>Array Operations</h1>
+
+        <input type="text" id="values"
+               placeholder="Enter numbers, e.g. 5, 2, 9, 1">
+
+        <br>
+
+        <button onclick="createArray()">Create Array</button>
+        <button onclick="showArray()">Show</button>
+        <button onclick="getLength()">Length</button>
+        <button onclick="sortArray()">Sort</button>
+        <button onclick="reverseArray()">Reverse</button>
+        <button onclick="sumArray()">Sum</button>
+        <button onclick="findMax()">Max</button>
+        <button onclick="findMin()">Min</button>
+
+        <br>
+
+        <input type="number" id="item"
+               placeholder="Value for push / search">
+
+        <br>
+
+        <button onclick="pushItem()">Push</button>
+        <button onclick="popItem()">Pop</button>
+        <button onclick="unshiftItem()">Unshift</button>
+        <button onclick="shiftItem()">Shift</button>
+        <button onclick="searchItem()">Search</button>
+        <button onclick="resetArray()">Reset</button>
+
+        <p id="array">Array: [ ]</p>
+        <p id="result"></p>
+
+    </div>
+
+    <script>
+        let numbers = [];
+
+        function getResultBox() {
+            return document.getElementById("result");
+        }
+
+        function showArray() {
+            document.getElementById("array").innerHTML =
+                "Array: [ " + numbers.join(", ") + " ]";
+        }
+
+        function parseInput(text) {
+            if (text.trim() === "") {
+                return [];
+            }
+
+            const parts = text.split(",");
+            const values = [];
+
+            for (let i = 0; i < parts.length; i++) {
+                const value = Number(parts[i].trim());
+                if (parts[i].trim() === "" || Number.isNaN(value)) {
+                    return null;
+                }
+                values.push(value);
+            }
+
+            return values;
+        }
+
+        function createArray() {
+            const parsed = parseInput(
+                document.getElementById("values").value
+            );
+
+            if (parsed === null) {
+                getResultBox().innerHTML =
+                    "Please enter numbers separated by commas.";
+                return;
+            }
+
+            numbers = parsed;
+            showArray();
+            getResultBox().innerHTML = "Array created.";
+        }
+
+        function getLength() {
+            getResultBox().innerHTML = "Length: " + numbers.length;
+        }
+
+        function sortArray() {
+            numbers.sort(function (a, b) {
+                return a - b;
+            });
+            showArray();
+            getResultBox().innerHTML = "Array sorted in ascending order.";
+        }
+
+        function reverseArray() {
+            numbers.reverse();
+            showArray();
+            getResultBox().innerHTML = "Array reversed.";
+        }
+
+        function sumArray() {
+            let sum = 0;
+            for (let i = 0; i < numbers.length; i++) {
+                sum += numbers[i];
+            }
+            getResultBox().innerHTML = "Sum: " + sum;
+        }
+
+        function findMax() {
+            if (numbers.length === 0) {
+                getResultBox().innerHTML = "Array is empty.";
+                return;
+            }
+
+            let max = numbers[0];
+            for (let i = 1; i < numbers.length; i++) {
+                if (numbers[i] > max) {
+                    max = numbers[i];
+                }
+            }
+            getResultBox().innerHTML = "Max: " + max;
+        }
+
+        function findMin() {
+            if (numbers.length === 0) {
+                getResultBox().innerHTML = "Array is empty.";
+                return;
+            }
+
+            let min = numbers[0];
+            for (let i = 1; i < numbers.length; i++) {
+                if (numbers[i] < min) {
+                    min = numbers[i];
+                }
+            }
+            getResultBox().innerHTML = "Min: " + min;
+        }
+
+        function readItem() {
+            const itemInput = document.getElementById("item");
+            const value = Number(itemInput.value);
+
+            if (itemInput.value === "" || Number.isNaN(value)) {
+                getResultBox().innerHTML = "Please enter a value.";
+                return null;
+            }
+
+            return value;
+        }
+
+        function pushItem() {
+            const value = readItem();
+            if (value === null) {
+                return;
+            }
+
+            numbers.push(value);
+            showArray();
+            getResultBox().innerHTML = value + " added at the end (push).";
+        }
+
+        function popItem() {
+            if (numbers.length === 0) {
+                getResultBox().innerHTML = "Array is empty.";
+                return;
+            }
+
+            const removed = numbers.pop();
+            showArray();
+            getResultBox().innerHTML = removed + " removed from the end (pop).";
+        }
+
+        function unshiftItem() {
+            const value = readItem();
+            if (value === null) {
+                return;
+            }
+
+            numbers.unshift(value);
+            showArray();
+            getResultBox().innerHTML = value + " added at the start (unshift).";
+        }
+
+        function shiftItem() {
+            if (numbers.length === 0) {
+                getResultBox().innerHTML = "Array is empty.";
+                return;
+            }
+
+            const removed = numbers.shift();
+            showArray();
+            getResultBox().innerHTML =
+                removed + " removed from the start (shift).";
+        }
+
+        function searchItem() {
+            const value = readItem();
+            if (value === null) {
+                return;
+            }
+
+            const index = numbers.indexOf(value);
+
+            if (index === -1) {
+                getResultBox().innerHTML = value + " was not found.";
+            } else {
+                getResultBox().innerHTML =
+                    value + " found at index " + index + ".";
+            }
+        }
+
+        function resetArray() {
+            numbers = [];
+            document.getElementById("values").value = "";
+            document.getElementById("item").value = "";
+            showArray();
+            getResultBox().innerHTML = "Array cleared.";
+        }
+    </script>
+
+</body>
+</html>
